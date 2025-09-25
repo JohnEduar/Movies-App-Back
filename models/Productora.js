@@ -30,6 +30,18 @@ const ProductoraSchema = new Schema({
         minlength: [3, 'El slogan debe tener al menos 3 caracteres'],
         maxlength: [100, 'El slogan no puede exceder los 100 caracteres']
     },
+    imagen: {
+        type: String,
+        required: false,
+        trim: true,
+        validate: {
+            validator: function(v) {
+                if (!v) return true; 
+                return /^https?:\/\/.+/.test(v);
+            },
+            message: 'La imagen debe ser una URL válida'
+        }
+    },
     fechaCreacion: {
         type: Date,
         default: Date.now
@@ -38,7 +50,6 @@ const ProductoraSchema = new Schema({
         type: Date,
         default: Date.now
     }
-
 });
 
 ProductoraSchema.pre('save', function(next) {

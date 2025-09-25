@@ -42,19 +42,20 @@ router.delete('/:id', async (req, res) => {
 // Registrar un nuevo director
 router.post('/', [
     check('nombre').notEmpty().withMessage('El nombre es obligatorio'),
-    check('estado').isIn(['activo', 'inactivo']).withMessage('El estado debe ser activo o inactivo')
+    check('estado').isIn(['activo', 'inactivo']).withMessage('El estado debe ser activo o inactivo'),
+    check('imagen').optional().isURL().withMessage('La imagen debe ser una URL válida')  // ← NUEVA LÍNEA
 ], async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
     try {
-        const { nombre, estado } = req.body;
+        const { nombre, estado, imagen } = req.body;  // ← AGREGAR imagen
         const existe = await Director.findOne({ nombre });
         if (existe) {
             return res.status(400).json({ msg: 'El director ya existe' });
         }
-        const director = new Director({ nombre, estado });
+        const director = new Director({ nombre, estado, imagen });  // ← AGREGAR imagen
         await director.save();
         res.status(201).json(director);
     } catch (error) {
@@ -65,7 +66,8 @@ router.post('/', [
 // Editar un director existente
 router.put('/:id', [
     check('nombre').notEmpty().withMessage('El nombre es obligatorio'),
-    check('estado').isIn(['activo', 'inactivo']).withMessage('El estado debe ser activo o inactivo')
+    check('estado').isIn(['activo', 'inactivo']).withMessage('El estado debe ser activo o inactivo'),
+    check('imagen').optional().isURL().withMessage('La imagen debe ser una URL válida')  // ← NUEVA LÍNEA
 ], async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -73,8 +75,8 @@ router.put('/:id', [
     }
     try {
         const { id } = req.params;
-        const { nombre, estado } = req.body;
-        const director = await Director.findByIdAndUpdate(id, { nombre, estado, fechaActualizacion: new Date() }, { new: true });
+        const { nombre, estado, imagen } = req.body;  // ← AGREGAR imagen
+        const director = await Director.findByIdAndUpdate(id, { nombre, estado, imagen, fechaActualizacion: new Date() }, { new: true });  // ← AGREGAR imagen
         if (!director) {
             return res.status(404).json({ msg: 'Director no encontrado' });
         }

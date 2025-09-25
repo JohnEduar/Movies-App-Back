@@ -16,12 +16,12 @@ router.post('/', [
     return res.status(400).json({ errors: errors.array() });
   }
   try {
-    const { nombre, estado, slogan, descripcion } = req.body;
+    const { nombre, estado, slogan, descripcion, imagen } = req.body;
     const existe = await Productora.findOne({ nombre });
     if (existe) {
       return res.status(400).json({ msg: 'La productora ya existe' });
     }
-    const productora = new Productora({ nombre, estado, slogan, descripcion });
+    const productora = new Productora({ nombre, estado, slogan, descripcion, imagen });
     await productora.save();
     res.status(201).json(productora);
   } catch (error) {
@@ -42,8 +42,15 @@ router.put('/:id', [
   }
   try {
     const { id } = req.params;
-    const { nombre, estado, slogan, descripcion } = req.body;
-    const productora = await Productora.findByIdAndUpdate(id, { nombre, estado, slogan, descripcion, fechaActualizacion: new Date() }, { new: true });
+    const { nombre, estado, slogan, descripcion, imagen } = req.body;
+    const productora = await Productora.findByIdAndUpdate(id, { 
+      nombre, 
+      estado, 
+      slogan, 
+      descripcion, 
+      imagen, 
+      fechaActualizacion: new Date() 
+    }, { new: true });
     if (!productora) {
       return res.status(404).json({ msg: 'Productora no encontrada' });
     }

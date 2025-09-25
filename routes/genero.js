@@ -1,5 +1,3 @@
-
-
 const { Router } = require('express');
 const { check, validationResult } = require('express-validator');
 const Genero = require('../models/Genero');
@@ -10,19 +8,20 @@ const router = Router();
 router.post('/', [
   check('nombre').notEmpty().withMessage('El nombre es obligatorio'),
   check('descripcion').notEmpty().withMessage('La descripción es obligatoria'),
-  check('estado').isIn(['activo', 'inactivo']).withMessage('El estado debe ser activo o inactivo')
+  check('estado').isIn(['activo', 'inactivo']).withMessage('El estado debe ser activo o inactivo'),
+  check('imagen').optional().isURL().withMessage('La imagen debe ser una URL válida')  // ← NUEVA LÍNEA
 ], async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
   try {
-    const { nombre, descripcion, estado } = req.body;
+    const { nombre, descripcion, estado, imagen } = req.body;  // ← AGREGAR imagen
     const existe = await Genero.findOne({ nombre });
     if (existe) {
       return res.status(400).json({ msg: 'El género ya existe' });
     }
-    const genero = new Genero({ nombre, descripcion, estado });
+    const genero = new Genero({ nombre, descripcion, estado, imagen });  // ← AGREGAR imagen
     await genero.save();
     res.status(201).json(genero);
   } catch (error) {
@@ -34,7 +33,8 @@ router.post('/', [
 router.put('/:id', [
   check('nombre').notEmpty().withMessage('El nombre es obligatorio'),
   check('descripcion').notEmpty().withMessage('La descripción es obligatoria'),
-  check('estado').isIn(['activo', 'inactivo']).withMessage('El estado debe ser activo o inactivo')
+  check('estado').isIn(['activo', 'inactivo']).withMessage('El estado debe ser activo o inactivo'),
+  check('imagen').optional().isURL().withMessage('La imagen debe ser una URL válida') 
 ], async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -42,8 +42,8 @@ router.put('/:id', [
   }
   try {
     const { id } = req.params;
-    const { nombre, descripcion, estado } = req.body;
-    const genero = await Genero.findByIdAndUpdate(id, { nombre, descripcion, estado, fechaActualizacion: new Date() }, { new: true });
+    const { nombre, descripcion, estado, imagen } = req.body; 
+    const genero = await Genero.findByIdAndUpdate(id, { nombre, descripcion, estado, imagen, fechaActualizacion: new Date() }, { new: true });  // ← AGREGAR imagen
     if (!genero) {
       return res.status(404).json({ msg: 'Género no encontrado' });
     }
@@ -75,6 +75,7 @@ router.get('/', async (req, res) => {
       nombre: genero.nombre,
       descripcion: genero.descripcion,
       estado: genero.estado,
+      imagen: genero.imagen, 
       fechaCreacion: genero.fechaCreacion,
       fechaActualizacion: genero.fechaActualizacion
     }));

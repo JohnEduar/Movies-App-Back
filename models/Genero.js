@@ -23,6 +23,19 @@ const GeneroSchema = new Schema({
         enum: {values: ['activo', 'inactivo'], message: 'El estado debe ser activo o inactivo'},
         default: 'activo'
     },
+    imagen: {                                    
+        type: String,
+        required: false,
+        trim: true,
+        validate: {
+            validator: function(v) {
+                if (!v) return true; // Si no hay imagen, está bien
+                // Validar que sea una URL válida
+                return /^https?:\/\/.+/.test(v);
+            },
+            message: 'La imagen debe ser una URL válida (http:// o https://)'
+        }
+    },
     fechaCreacion: {
         type: Date,
         default: Date.now
@@ -31,7 +44,6 @@ const GeneroSchema = new Schema({
         type: Date,
         default: Date.now
     }
-
 });
 
 GeneroSchema.pre('save', function(next) {
